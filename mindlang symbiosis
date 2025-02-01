@@ -1,0 +1,39 @@
+Define the syntax rules for MindLang:
+```lark
+// mindlang.lark
+start: (problem | solve | validate | reward)*
+
+problem: "problem" NAME "{" [_problem_body] "}"
+_problem_body: (pair ("," pair)*)? 
+pair: NAME ":" value
+
+solve: "solve" NAME "by" NAME "{" [_solve_body] "}"
+_solve_body: (pair ("," pair)*)? 
+
+validate: "validate" NAME "by" NAME "{" [_validate_body] "}"
+_validate_body: (pair ("," pair)*)? 
+
+reward: "reward" NAME "{" [_reward_body] "}"
+_reward_body: (reward_action)*
+
+reward_action: "if" condition "{" (transfer | penalty)+ "}"
+condition: NAME ">=" NUMBER "%"
+transfer: "transfer" amount "$MIND" "to" NAME
+penalty: "penalty" NAME amount "$MIND"
+
+value: NUMBER               -> number
+      | STRING              -> string
+      | duration            -> duration
+      | amount "$MIND"      -> currency
+      | NAME                -> name
+
+duration: NUMBER ("d"|"h"|"m")
+amount: NUMBER
+
+NAME: /[a-zA-Z_][a-zA-Z0-9_]*/
+STRING: /"[\x20-\x7e]*"/
+NUMBER: /-?\d+(\.\d+)?/
+
+%import common.WS
+%ignore WS
+```
